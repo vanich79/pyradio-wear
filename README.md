@@ -1,7 +1,29 @@
+<div align="center">
+
+<img src="docs/img/icon.png" width="112" alt="PyRadio on your watch">
+
 # PyRadio on your watch
 
-Интернет-радио в ваших часах. Тот же плейлист, что у [PyRadio](https://github.com/coderholic/pyradio)
-на Linux, но всё сделано под экран в 466 точек.
+**Интернет-радио в ваших часах.**
+Тот же плейлист, что у [PyRadio](https://github.com/coderholic/pyradio) на Linux,
+но всё сделано под экран в 466 точек.
+
+[![Релиз](https://img.shields.io/github/v/release/vanich79/pyradio-wear?label=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7&color=7fd1ff)](https://github.com/vanich79/pyradio-wear/releases/latest)
+[![Wear OS](https://img.shields.io/badge/Wear%20OS-3%20%D0%B8%20%D0%BD%D0%BE%D0%B2%D0%B5%D0%B5-3e7fa6)](docs/INSTALL.md)
+
+### [⬇ Скачать и поставить на часы](docs/INSTALL.md)
+
+<sub>Пошагово, без командной строки, если она вам ни к чему</sub>
+
+<br>
+
+<img src="docs/img/stations.png" width="200" alt="Список станций">
+<img src="docs/img/now-playing.png" width="200" alt="Что играет">
+<img src="docs/img/tile.png" width="200" alt="Плитка">
+
+<sub>Список станций&nbsp;&nbsp;·&nbsp;&nbsp;что играет и громкость&nbsp;&nbsp;·&nbsp;&nbsp;плитка</sub>
+
+</div>
 
 Написано на Kotlin, интерфейс — Compose for Wear OS, звук — Media3/ExoPlayer.
 Проверено на TicWatch Atlas (Wear OS 4, Android 13, API 33), работает на любых часах
@@ -198,6 +220,7 @@ PYRADIO_SMOKE=1 ./gradlew :core:resolver:test --tests '*RealStationsSmokeTest*' 
 
 | | |
 |---|---|
+| [docs/INSTALL.md](docs/INSTALL.md) | **Установка на часы** — по шагам, для тех, кто не программист |
 | [docs/USAGE.md](docs/USAGE.md) | Как пользоваться: три поверхности, громкость, что делать при ошибках |
 | [docs/BUILDING.md](docs/BUILDING.md) | Сборка, установка на часы, отладка по Wi-Fi, кириллица в пути |
 | [docs/PLAYLIST.md](docs/PLAYLIST.md) | Обновить плейлист из PyRadio, проверить, какие станции живы |

@@ -55,6 +55,40 @@ gw.cmd assembleDebug
 
 ---
 
+## Подписанная сборка для раздачи
+
+`assembleRelease` без ключа даёт **неподписанный** APK — Android такой не поставит.
+Ключ подписи в репозитории не хранится и храниться не должен; путь к нему и пароли
+сборка берёт из окружения:
+
+```sh
+export ATLAS_KEYSTORE="D:/TicWach_ATLAS/keys/pyradio-release.jks"
+export ATLAS_KEYSTORE_PASSWORD="..."
+export ATLAS_KEY_ALIAS="pyradio"
+export ATLAS_KEY_PASSWORD="..."
+./gradlew assembleRelease
+```
+
+Готовый файл — `app/build/outputs/apk/release/app-release.apk`, около 5 МБ.
+Проверить, что он действительно подписан:
+
+```sh
+"$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs app-release.apk
+```
+
+> [!warning] Ключ нельзя терять
+> Android разрешает обновлять приложение только сборкой, подписанной **тем же**
+> ключом. Потеряется файл — новую версию поверх старой поставить будет нельзя,
+> только удалив приложение вместе с избранным.
+
+Если ключа нет, создать новый:
+
+```sh
+keytool -genkeypair -keystore pyradio-release.jks -storetype PKCS12   -alias pyradio -keyalg RSA -keysize 4096 -validity 10000   -dname "CN=PyRadio Wear, O=..., C=RU"
+```
+
+---
+
 ## Установка на часы
 
 ### Подключение по Wi-Fi
