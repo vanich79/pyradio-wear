@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Экран гаснет через несколько секунд, а радио должно играть дальше. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Уведомление медиасессии: без него служба не удержится на переднем плане. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name=".RadioApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PyRadio">
+
+        <!-- Часы ходят в сеть сами: ни установка, ни работа не требуют телефона. -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:taskAffinity=""
+            android:theme="@style/Theme.PyRadio">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".playback.RadioService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+
+        <!--
+            Заглушка без интерфейса: ловит нажатие с плитки и толкает службу.
+            noHistory и excludeFromRecents — чтобы она не оставалась ни в стеке,
+            ни в списке недавних: её существование пользователя не касается.
+
+            exported="true" здесь обязателен, и это не небрежность: плитку рисует
+            системный процесс, и он же выполняет её LaunchAction — то есть запускает
+            эту активность извне нашего приложения. С exported="false" нажатие на
+            плитке упиралось бы в SecurityException и не делало ничего.
+            Полномочий она не даёт никаких: всё, чего можно добиться снаружи, —
+            включить или выключить радио, которое пользователь и так включает одной
+            кнопкой.
+        -->
+        <activity
+            android:name=".tile.RadioActionActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.PyRadio.Invisible" />
+
+        <!-- Плитка: свайп вправо — и последняя станция в одно касание. -->
+        <service
+            android:name=".tile.RadioTileService"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview" />
+        </service>
+
+        <!-- Комплик: что играет, прямо на циферблате. -->
+        <service
+            android:name=".complication.NowPlayingComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_notification"
+            android:label="@string/complication_label"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT,MONOCHROMATIC_IMAGE" />
+
+            <!--
+                Ноль означает «сами не обновляемся»: комплик перерисовывается тогда,
+                когда изменилось состояние воспроизведения, а не по таймеру, который
+                будил бы часы ради тех же слов.
+            -->
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+    </application>
+
+</manifest>

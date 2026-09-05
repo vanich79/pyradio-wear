@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PyRadio</string>
+
+    <string name="stations_title">Станции</string>
+    <string name="favorites">Избранное</string>
+    <string name="all_genres">Все</string>
+    <string name="filter_title">Фильтр</string>
+    <string name="filter_change">Фильтр…</string>
+    <string name="filter_empty">В этом фильтре пусто</string>
+
+    <string name="state_connecting">Подключение…</string>
+    <string name="state_buffering">Буферизация…</string>
+    <string name="state_idle">Выберите станцию</string>
+    <string name="state_playing">Играет</string>
+
+    <string name="fail_no_network">Нет сети</string>
+    <string name="fail_empty_playlist">Плейлист станции пуст</string>
+    <string name="fail_unreachable">Станция не отвечает</string>
+    <string name="fail_not_audio">Вместо потока страница</string>
+    <string name="fail_unsupported">Формат не поддерживается</string>
+
+    <string name="action_play">Играть</string>
+    <string name="action_stop">Стоп</string>
+    <string name="action_favorite">В избранное</string>
+    <string name="action_unfavorite">Убрать из избранного</string>
+    <string name="action_retry">Ещё раз</string>
+    <string name="action_volume_up">Громче</string>
+    <string name="action_volume_down">Тише</string>
+
+    <string name="tile_label">Радио</string>
+    <string name="tile_last_played">Слушали последним</string>
+    <string name="tile_no_station">Радио</string>
+    <string name="tile_pick_in_app">Выберите станцию в приложении</string>
+    <string name="tile_failed">Станция не отвечает</string>
+
+    <string name="complication_label">Что играет</string>
+    <string name="complication_idle">Радио не играет</string>
+    <string name="complication_off">Выключено</string>
+</resources>

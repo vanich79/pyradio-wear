@@ -1,0 +1,17 @@
+# Сборка. `build/` без ведущего слэша — чтобы правило действовало на каждом
+# уровне: каталоги сборки есть и у корня, и у app, и у каждого модуля core.
+build/
+.gradle/
+.kotlin/
+
+# Пути к SDK на конкретной машине.
+local.properties
+
+# IDE
+*.iml
+.idea/
+.externalNativeBuild
+.cxx
+captures/
+
+.DS_Store

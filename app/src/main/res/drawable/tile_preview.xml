@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Предпросмотр в списке выбора плиток. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#AECBFA"
+        android:pathData="M12,11m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+    <path
+        android:strokeColor="#AECBFA"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M7.4,15.6 A6.5,6.5 0 0 1 7.4,6.4" />
+    <path
+        android:strokeColor="#AECBFA"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M16.6,6.4 A6.5,6.5 0 0 1 16.6,15.6" />
+</vector>

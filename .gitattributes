@@ -1,0 +1,23 @@
+# Концы строк нормализуются в репозитории, а в рабочей копии — по платформе.
+# Без этого файла Windows-клиент положил бы в репозиторий CRLF, и `gradlew` перестал
+# бы запускаться на Linux и macOS: shell не прощает возврата каретки в шебанге.
+* text=auto eol=lf
+
+# Скрипты, которые исполняет cmd.exe. Он не понимает LF в некоторых конструкциях,
+# поэтому у них CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# А этот исполняет sh — только LF, независимо от платформы разработчика.
+gradlew text eol=lf
+
+# Двоичное. Нормализация концов строк такие файлы портит.
+*.jar binary
+*.apk binary
+*.aab binary
+*.keystore binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.ttf binary
+*.otf binary

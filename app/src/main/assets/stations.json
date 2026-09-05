@@ -1,0 +1,286 @@
+{
+  "version": 1,
+  "source": "PyRadio stations.csv",
+  "stations": [
+    {
+      "id": "alternative-bagel-radio",
+      "name": "Alternative (BAGeL Radio)",
+      "url": "https://ais-sa3.cdnstream1.com/2606_128.aac",
+      "genre": "Alternative",
+      "kind": "DIRECT"
+    },
+    {
+      "id": "alternative-the-alternative-project",
+      "name": "Alternative (The Alternative Project)",
+      "url": "http://c9.prod.playlists.ihrhls.com/4447/playlist.m3u8",
+      "genre": "Alternative",
+      "kind": "HLS"
+    },
+    {
+      "id": "american-roots-boot-liquor-somafm",
+      "name": "American Roots (Boot Liquor - SomaFM)",
+      "url": "http://somafm.com/bootliquor.pls",
+      "genre": "Roots",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "celtic-thistleradio-somafm",
+      "name": "Celtic (ThistleRadio - SomaFM)",
+      "url": "http://somafm.com/thistle.pls",
+      "genre": "Celtic",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "chillout-groove-salad-somafm",
+      "name": "Chillout (Groove Salad - SomaFM)",
+      "url": "http://somafm.com/startstream=groovesalad.pls",
+      "genre": "Chillout",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "groove-salad-classic-early-2000s-ambient",
+      "name": "Groove Salad Classic (Early 2000s Ambient)",
+      "url": "https://somafm.com/gsclassic.pls",
+      "genre": "Ambient",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "n5md-radio-ambient-and-experimental",
+      "name": "n5MD Radio (Ambient and Experimental)",
+      "url": "https://somafm.com/n5md.pls",
+      "genre": "Ambient",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "vaporwaves-somafm",
+      "name": "Vaporwaves [SomaFM]",
+      "url": "https://somafm.com/vaporwaves.pls",
+      "genre": "Electronic",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "commodore-64-remixes-slay-radio",
+      "name": "Commodore 64 Remixes (Slay Radio)",
+      "url": "http://www.slayradio.org/tune_in.php/128kbps/listen.m3u",
+      "genre": "Chiptune",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "covers-somafm",
+      "name": "Covers (SomaFM)",
+      "url": "http://somafm.com/covers.pls",
+      "genre": "Covers",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "downtempo-secret-agent-somafm",
+      "name": "Downtempo (Secret Agent - SomaFM)",
+      "url": "http://somafm.com/secretagent.pls",
+      "genre": "Downtempo",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "dub-step-dub-step-beyond-somafm",
+      "name": "Dub Step (Dub Step Beyond - SomaFM)",
+      "url": "http://somafm.com/dubstep.pls",
+      "genre": "Dubstep",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "folk-folk-forward-somafm",
+      "name": "Folk (Folk Forward - SomaFM)",
+      "url": "http://somafm.com/folkfwd.pls",
+      "genre": "Folk",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "hip-hop-hot-97-nyc",
+      "name": "Hip Hop (Hot 97 NYC)",
+      "url": "http://playerservices.streamtheworld.com/pls/WQHTAAC.pls",
+      "genre": "Hip Hop",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "hip-hop-power-1051-nyc",
+      "name": "Hip Hop (Power 1051 NYC)",
+      "url": "http://c11.prod.playlists.ihrhls.com/1481/playlist.m3u8",
+      "genre": "Hip Hop",
+      "kind": "HLS"
+    },
+    {
+      "id": "house-beat-blender-somafm",
+      "name": "House (Beat Blender - SomaFM)",
+      "url": "http://somafm.com/startstream=beatblender.pls",
+      "genre": "House",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "indie-pop-indie-pop-rocks-somafm",
+      "name": "Indie Pop (Indie Pop Rocks! - SomaFM)",
+      "url": "http://somafm.com/indiepop130.pls",
+      "genre": "Indie",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "intelligent-dance-music-cliq-hop-somafm",
+      "name": "Intelligent dance music (Cliq Hop - SomaFM)",
+      "url": "http://somafm.com/startstream=cliqhop.pls",
+      "genre": "IDM",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "jazz-sonic-universe-somafm",
+      "name": "Jazz (Sonic Universe - SomaFM)",
+      "url": "http://somafm.com/startstream=sonicuniverse.pls",
+      "genre": "Jazz",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "lounge-illinois-street-lounge-somafm",
+      "name": "Lounge (Illinois Street Lounge - SomaFM)",
+      "url": "http://somafm.com/illstreet.pls",
+      "genre": "Lounge",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "the-trip-somafm",
+      "name": "The Trip: [SomaFM]",
+      "url": "https://somafm.com/thetrip.pls",
+      "genre": "Psychedelic",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "pop-poptron-somafm",
+      "name": "Pop (PopTron! - SomaFM)",
+      "url": "http://somafm.com/poptron.pls",
+      "genre": "Pop",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "progressive-tags-trance-trip-somafm",
+      "name": "Progressive (Tags Trance Trip - SomaFM)",
+      "url": "http://somafm.com/tagstrance.pls",
+      "genre": "Trance",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "public-radio-npr-national-public-radio-stream",
+      "name": "Public Radio (NPR National Public Radio Stream)",
+      "url": "https://npr-ice.streamguys1.com/live.mp3",
+      "genre": "Talk",
+      "kind": "DIRECT"
+    },
+    {
+      "id": "reggae-dancehall-ragga-kings",
+      "name": "Reggae Dancehall (Ragga Kings)",
+      "url": "https://raggakings.radio:8443/stream.ogg",
+      "genre": "Reggae",
+      "kind": "DIRECT"
+    },
+    {
+      "id": "heavyweight-reggae",
+      "name": "Heavyweight Reggae",
+      "url": "https://somafm.com/reggae.pls",
+      "genre": "Reggae",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "rock-digitalis-somafm",
+      "name": "Rock (Digitalis - SomaFM)",
+      "url": "http://somafm.com/digitalis.pls",
+      "genre": "Rock",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "vox-noctem-rock-goth",
+      "name": "Vox Noctem: Rock-Goth",
+      "url": "http://r2d2.voxnoctem.de:8000/voxnoctem.mp3",
+      "genre": "Goth",
+      "kind": "DIRECT"
+    },
+    {
+      "id": "metal-detector",
+      "name": "Metal Detector",
+      "url": "https://somafm.com/metal.pls",
+      "genre": "Metal",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "danceuk",
+      "name": "DanceUK",
+      "url": "http://uk2.internet-radio.com:8024/listen.pls",
+      "genre": "Dance",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "jazzgroove",
+      "name": "JazzGroove",
+      "url": "http://199.180.72.2:8015/listen.pls?sid=1",
+      "genre": "Jazz",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "radio-paradise-main-mix",
+      "name": "Radio Paradise - Main Mix",
+      "url": "http://stream.radioparadise.com/aac-128",
+      "genre": "Eclectic",
+      "kind": "UNKNOWN"
+    },
+    {
+      "id": "radio-paradise-mellow-mix",
+      "name": "Radio Paradise - Mellow Mix",
+      "url": "http://stream.radioparadise.com/mellow-128",
+      "genre": "Eclectic",
+      "kind": "UNKNOWN"
+    },
+    {
+      "id": "radio-paradise-rock-mix",
+      "name": "Radio Paradise - Rock Mix",
+      "url": "http://stream.radioparadise.com/rock-128",
+      "genre": "Eclectic",
+      "kind": "UNKNOWN"
+    },
+    {
+      "id": "radio-paradise-eclectic-mix",
+      "name": "Radio Paradise - Eclectic Mix",
+      "url": "http://stream.radioparadise.com/eclectic-128",
+      "genre": "Eclectic",
+      "kind": "UNKNOWN"
+    },
+    {
+      "id": "echoes-of-bluemars",
+      "name": "Echoes of Bluemars",
+      "url": "http://streams.echoesofbluemars.org:8000/bluemars.m3u",
+      "genre": "Ambient",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "echoes-of-bluemars-cryosleep",
+      "name": "Echoes of Bluemars - Cryosleep",
+      "url": "http://streams.echoesofbluemars.org:8000/cryosleep.m3u",
+      "genre": "Ambient",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "echoes-of-bluemars-voices-from-within",
+      "name": "Echoes of Bluemars - Voices from Within",
+      "url": "http://streams.echoesofbluemars.org:8000/voicesfromwithin.m3u",
+      "genre": "Ambient",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "synphaera-radio-space-music",
+      "name": "Synphaera Radio (Space Music)",
+      "url": "https://somafm.com/synphaera.pls",
+      "genre": "Ambient",
+      "kind": "PLAYLIST"
+    },
+    {
+      "id": "radio-leva-serbian-folk-country",
+      "name": "Radio Levač (Serbian Folk & Country)",
+      "url": "http://213.239.205.210:8046/stream",
+      "genre": "Folk",
+      "kind": "UNKNOWN"
+    }
+  ]
+}
