@@ -16,8 +16,8 @@ android {
         // Wear OS 4 / Android 13 / API 33.
         minSdk = 30
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     signingConfigs {
@@ -101,9 +101,11 @@ dependencies {
     implementation(libs.wear.compose.foundation)
     implementation(libs.wear.compose.navigation)
     implementation(libs.wear.tooling.preview)
-    // androidx.wear:wear, wear-input и wear-ongoing сюда намеренно не включены:
-    // ничего из них приложение не использует, а первая тянет за собой
-    // androidx.fragment 1.2.4 — версию, на которой ломается ActivityResult API.
+    // Пометка «идёт длительная работа» для индикатора на циферблате.
+    implementation(libs.wear.ongoing)
+    // androidx.wear:wear и wear-input сюда намеренно не включены: ничего из них
+    // приложение не использует, а первая тянет за собой androidx.fragment 1.2.4 —
+    // версию, на которой ломается ActivityResult API.
 
     // Плитка и её разметка
     implementation(libs.wear.tiles)

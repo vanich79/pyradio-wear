@@ -119,6 +119,44 @@ adb exec-out screencap -p > screen.png
 > adb shell settings put system screen_off_timeout 30000
 > ```
 
+### Если звук пропадает сам
+
+Первым делом смотрите, жива ли служба и на переднем ли она плане:
+
+```sh
+adb shell dumpsys activity services com.pyradio.wear | grep -E "ServiceRecord|isForeground"
+```
+
+`isForeground=true` — всё как надо. Если службы нет вовсе, причину назовёт лог:
+
+```sh
+adb logcat -d | grep -i pyradio | grep -v RecentTasksLauncherRepo
+```
+
+> [!example] Так была найдена ошибка 0.2.0
+> ```
+> ActivityManager: Stopping service due to app idle:
+>   com.pyradio.wear.debug/…/RadioService
+> ```
+> Система останавливала службу как фоновую примерно через три минуты после
+> ухода часов в ambient. Замки при этом держались исправно — проверяется так:
+> ```sh
+> adb shell dumpsys power | grep "ExoPlayer:WakeLockManager"
+> adb shell dumpsys wifi  | grep -A2 "^Locks held"
+> ```
+> Обе строки были на месте, то есть дело было не в энергосбережении и не в Wi-Fi,
+> а в том, что служба не была foreground.
+
+Долгое наблюдение удобно вести опросом раз в полминуты — часы должны при этом
+лежать нетронутыми, иначе пробуждение экрана и случайное нажатие смажут картину:
+
+```sh
+adb shell dumpsys power | grep -oE "mWakefulness=[A-Za-z]+"
+adb shell dumpsys media_session | grep -A8 "package=com.pyradio.wear.debug" | grep -oE "state=[0-9]+, position=[0-9]+"
+```
+
+`state=3` и растущая `position` означают, что звук идёт.
+
 ### Чего проверить не получится
 
 **Поворот короны.** Колесо — это `/dev/input/event0` с `REL_WHEEL`, но `sendevent`

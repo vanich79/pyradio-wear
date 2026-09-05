@@ -1,7 +1,14 @@
 package com.pyradio.wear.playback
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -15,6 +22,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.pyradio.wear.R
 import com.pyradio.wear.RadioApp
 import com.pyradio.wear.model.FailureReason
 import com.pyradio.wear.model.PlaybackState
@@ -22,7 +30,9 @@ import com.pyradio.wear.model.Station
 import com.pyradio.wear.resolver.Resolution
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -48,6 +58,10 @@ class RadioService : MediaSessionService() {
 
     /** Станция, которую сейчас пытаются играть. Плеер знает только адрес. */
     private var current: Station? = null
+
+    /** Сколько раз подряд переподключались, не услышав звука. Сбрасывается, когда он пошёл. */
+    private var reconnects = 0
+    private var reconnectJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -95,24 +109,81 @@ class RadioService : MediaSessionService() {
 
         player.addListener(playerListener)
         session = MediaSession.Builder(this, player).build()
+
+        // Своё уведомление вместо заводского: то же самое плюс пометка
+        // OngoingActivity, без которой Wear не считает воспроизведение
+        // длительной работой пользователя.
+        setMediaNotificationProvider(RadioNotificationProvider(this))
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            // Идентификатора может не быть: плитка просит «последнюю», не зная,
-            // какая она. Кто именно — служба выясняет сама, чтобы вызывающему
-            // не приходилось лезть в хранилище и ждать его ради одного нажатия.
-            ACTION_PLAY -> startStation(intent.getStringExtra(EXTRA_STATION_ID))
+            ACTION_PLAY -> {
+                // На передний план выходим здесь, синхронно, до всякой сети.
+                // Две причины. Первая: службу, запущенную через
+                // startForegroundService, система убьёт, если startForeground не
+                // случится за пять секунд, — а разворачивание .pls столько и
+                // занимает. Вторая важнее: пока служба фоновая, App Standby
+                // вправе её остановить, и именно это и происходило, стоило часам
+                // уйти в ambient:
+                //   ActivityManager: Stopping service due to app idle: RadioService
+                // Media3 своё уведомление показывает, но startForeground не зовёт,
+                // пока к сессии никто не подключился, — а с плитки не подключается
+                // никто.
+                goForeground()
+                // Идентификатора может не быть: плитка просит «последнюю», не зная,
+                // какая она. Кто именно — служба выясняет сама, чтобы вызывающему
+                // не приходилось лезть в хранилище и ждать его ради одного нажатия.
+                startStation(intent.getStringExtra(EXTRA_STATION_ID))
+            }
             ACTION_STOP -> stopPlayback()
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
+    /**
+     * Ставит службу на передний план своим уведомлением-заглушкой.
+     *
+     * Заглушка живёт секунды: как только Media3 построит настоящее уведомление,
+     * оно заменит эту по тому же номеру. Пустой текст здесь недопустим — на
+     * экране уведомлений часов он выглядел бы сломанной строкой, поэтому пишем
+     * то же, что покажет экран: «Подключение…».
+     */
+    private fun goForeground() {
+        val manager = getSystemService<NotificationManager>() ?: return
+
+        // Канал создаём сами: Media3 заводит свой лениво, а уведомление нужно
+        // прямо сейчас, иначе система его отбросит.
+        manager.createNotificationChannel(
+            NotificationChannel(
+                RadioNotificationProvider.CHANNEL_ID,
+                getString(R.string.app_name),
+                NotificationManager.IMPORTANCE_LOW,
+            ),
+        )
+
+        val notification = NotificationCompat.Builder(this, RadioNotificationProvider.CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.state_connecting))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+
+        ServiceCompat.startForeground(
+            this,
+            RadioNotificationProvider.NOTIFICATION_ID,
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+        )
+    }
+
     // --- Воспроизведение ---
 
     private fun startStation(stationId: String?) {
+        reconnectJob?.cancel()
         scope.launch {
             val id = stationId ?: deps.preferences.lastStationId.first()
             val station = id?.let { deps.stations.byId(it) } ?: return@launch
@@ -141,6 +212,8 @@ class RadioService : MediaSessionService() {
     }
 
     private fun stopPlayback() {
+        reconnectJob?.cancel()
+        reconnects = 0
         session?.player?.run {
             stop()
             clearMediaItems()
@@ -169,6 +242,23 @@ class RadioService : MediaSessionService() {
                 return
             }
 
+            // Зеркала кончились. Для эфира это ещё не приговор: в ambient связь
+            // проваливается и возвращается, и правильный ответ — позвонить ещё раз,
+            // а не замолчать навсегда. Сдаёмся только исчерпав попытки.
+            if (reconnects < RECONNECT_DELAYS.size) {
+                val delayMillis = RECONNECT_DELAYS[reconnects]
+                reconnects++
+                publish(PlaybackState.Connecting(station))
+                reconnectJob = scope.launch {
+                    delay(delayMillis)
+                    // Адрес мог протухнуть вместе со связью — разворачиваем заново.
+                    deps.streams.invalidate(station.id)
+                    startStation(station.id)
+                }
+                return
+            }
+
+            reconnects = 0
             scope.launch { deps.streams.invalidate(station.id) }
             publish(PlaybackState.Failed(station, explain(error.toFailureReason())))
         }
@@ -182,6 +272,8 @@ class RadioService : MediaSessionService() {
             Player.STATE_BUFFERING -> PlaybackState.Buffering(station)
             Player.STATE_READY ->
                 if (player.isPlaying) {
+                    // Звук пошёл — прошлые срывы больше не в счёт.
+                    reconnects = 0
                     PlaybackState.Playing(station, player.icyTitle())
                 } else {
                     // Готов, но молчит: обычно чужое приложение забрало звук.
@@ -203,6 +295,13 @@ class RadioService : MediaSessionService() {
      * о переменах только отсюда.
      */
     private fun publish(state: PlaybackState) {
+        // Звука нет и не будет — уходим с переднего плана. Иначе после
+        // сорвавшейся станции на часах навсегда осталось бы уведомление
+        // «идёт воспроизведение», которого не происходит, а служба держалась бы
+        // в памяти до перезагрузки. Повтор поднимет её обратно.
+        if (state is PlaybackState.Failed || state is PlaybackState.Idle) {
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        }
         deps.playback.publish(state)
         RadioSurfaces.requestUpdate(this)
     }
@@ -304,6 +403,15 @@ class RadioService : MediaSessionService() {
         private const val CONNECT_TIMEOUT_MS = 8_000
         private const val READ_TIMEOUT_MS = 8_000
 
+        /**
+         * Паузы между попытками переподключения, миллисекунды.
+         *
+         * Первая почти сразу — обрыв чаще всего мгновенный; дальше реже, чтобы не
+         * долбиться в мёртвую станцию и не жечь батарею. Всего около минуты: дольше
+         * ждать молча нельзя, человек должен увидеть отказ и решить сам.
+         */
+        private val RECONNECT_DELAYS = longArrayOf(2_000, 4_000, 8_000, 15_000, 30_000)
+
         private const val ACTION_PLAY = "com.pyradio.wear.action.PLAY"
         private const val ACTION_STOP = "com.pyradio.wear.action.STOP"
         private const val EXTRA_STATION_ID = "station_id"
@@ -314,7 +422,11 @@ class RadioService : MediaSessionService() {
          * переднем плане: с Android 12 фоновый запуск службы система запрещает.
          */
         fun play(context: Context, stationId: String? = null) {
-            context.startService(
+            // Именно startForegroundService, а не startService: обычная фоновая
+            // служба на часах живёт до первого простоя приложения и умирает
+            // вместе со звуком.
+            ContextCompat.startForegroundService(
+                context,
                 Intent(context, RadioService::class.java)
                     .setAction(ACTION_PLAY)
                     .putExtra(EXTRA_STATION_ID, stationId),
