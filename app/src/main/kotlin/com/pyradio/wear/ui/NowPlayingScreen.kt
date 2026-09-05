@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -77,7 +78,11 @@ fun NowPlayingScreen(
                 .focusRequester(focusRequester)
                 .focusable()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 26.dp),
+                // Отступы сверху и снизу маленькие намеренно. Экран круглый, и
+                // чем выше строка, тем ýже полоса, которую видно: на четверти
+                // высоты стекло срезает почти треть ширины. Раньше содержимое не
+                // помещалось, съезжало вверх — и имя станции обрезало с обоих краёв.
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -91,16 +96,20 @@ fun NowPlayingScreen(
             }
 
             Text(
+                // Доля ширины, а не вся: у круглого экрана углов нет, и текст,
+                // растянутый до краёв прямоугольника, в них не попадает.
+                modifier = Modifier.fillMaxWidth(SAFE_WIDTH),
                 text = station.name,
                 style = MaterialTheme.typography.title3,
                 textAlign = TextAlign.Center,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(4.dp))
 
             Text(
+                modifier = Modifier.fillMaxWidth(SAFE_WIDTH),
                 text = playback.shortLabel(),
                 style = MaterialTheme.typography.caption2,
                 color = if (playback is PlaybackState.Failed) {
@@ -109,11 +118,11 @@ fun NowPlayingScreen(
                     MaterialTheme.colors.onSurfaceVariant
                 },
                 textAlign = TextAlign.Center,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(10.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val favorite = station.id in state.favorites
@@ -140,7 +149,7 @@ fun NowPlayingScreen(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
 
             VolumeRow(
                 fraction = state.volumeFraction,
@@ -198,6 +207,11 @@ private fun VolumeRow(
         }
     }
 }
+
+/**
+ * Доля ширины экрана, внутри которой текст гарантированно виден на круглом стекле.
+ */
+private const val SAFE_WIDTH = 0.82f
 
 /**
  * Копилка хода колеса.
