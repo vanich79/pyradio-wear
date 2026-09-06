@@ -55,6 +55,13 @@ class RadioService : MediaSessionService() {
     /** Станция, которую сейчас пытаются играть. Плеер знает только адрес. */
     private var current: Station? = null
 
+    /**
+     * Идёт наш собственный запуск: элементы плееру уже отданы, но `prepare` ещё
+     * не вызван. В этом промежутке плеер сообщает `STATE_IDLE`, и без этой отметки
+     * его невозможно отличить от остановки, пришедшей снаружи.
+     */
+    private var starting = false
+
     /** Сколько раз подряд переподключались, не услышав звука. Сбрасывается, когда он пошёл. */
     private var reconnects = 0
     private var reconnectJob: Job? = null
@@ -178,6 +185,7 @@ class RadioService : MediaSessionService() {
                     if (current?.id != station.id) return@launch
 
                     val player = session?.player ?: return@launch
+                    starting = true
                     // Все зеркала из .pls кладём в очередь разом: тогда обрыв
                     // первого — это переход к следующему элементу, а не новый
                     // круг разворачивания плейлиста.
@@ -197,6 +205,7 @@ class RadioService : MediaSessionService() {
             clearMediaItems()
         }
         current = null
+        starting = false
         publish(PlaybackState.Idle)
         // Держать службу без звука не за чем: состояние живёт в Application и
         // переживёт её смерть, а сессию система пересоздаст при следующем запуске.
@@ -247,10 +256,14 @@ class RadioService : MediaSessionService() {
         val player = session?.player ?: return
 
         val next = when (player.playbackState) {
-            Player.STATE_BUFFERING -> PlaybackState.Buffering(station)
+            Player.STATE_BUFFERING -> {
+                starting = false
+                PlaybackState.Buffering(station)
+            }
             Player.STATE_READY ->
                 if (player.isPlaying) {
                     // Звук пошёл — прошлые срывы больше не в счёт.
+                    starting = false
                     reconnects = 0
                     PlaybackState.Playing(station, player.icyTitle())
                 } else {
@@ -259,8 +272,16 @@ class RadioService : MediaSessionService() {
                 }
             // Поток кончился там, где кончиться не мог, — эфир оборвался.
             Player.STATE_ENDED -> PlaybackState.Failed(station, FailureReason.STREAM_UNREACHABLE)
-            // STATE_IDLE: либо ещё не начинали, либо уже остановились. И то и другое
-            // выставлено явно выше, и перетирать это здесь незачем.
+            // STATE_IDLE во время нашего запуска — обычное дело: элементы отданы,
+            // prepare ещё впереди. А тот же STATE_IDLE после того, как звук уже
+            // шёл, означает остановку снаружи — медиакнопкой на гарнитуре или из
+            // системной панели. Без этой ветки служба оставалась на переднем плане
+            // с уведомлением «играет», которого уже не происходит.
+            Player.STATE_IDLE -> {
+                if (starting) return
+                stopPlayback()
+                return
+            }
             else -> return
         }
         publish(next)
