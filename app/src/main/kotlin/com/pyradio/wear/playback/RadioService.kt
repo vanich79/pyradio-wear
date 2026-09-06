@@ -1,14 +1,10 @@
 package com.pyradio.wear.playback
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -121,18 +117,14 @@ class RadioService : MediaSessionService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_PLAY -> {
-                // На передний план выходим здесь, синхронно, до всякой сети.
-                // Две причины. Первая: службу, запущенную через
+                // На передний план выходим здесь, синхронно, ещё до обращения
+                // к сети. Две причины. Первая: службу, запущенную через
                 // startForegroundService, система убьёт, если startForeground не
                 // случится за пять секунд, — а разворачивание .pls столько и
-                // занимает. Вторая важнее: пока служба фоновая, App Standby
-                // вправе её остановить, и именно это и происходило, стоило часам
-                // уйти в ambient:
+                // занимает. Вторая важнее: пока служба фоновая, App Standby вправе
+                // её остановить, и это и происходило, стоило часам уйти в ambient:
                 //   ActivityManager: Stopping service due to app idle: RadioService
-                // Media3 своё уведомление показывает, но startForeground не зовёт,
-                // пока к сессии никто не подключился, — а с плитки не подключается
-                // никто.
-                goForeground()
+                showPlaceholder()
                 // Идентификатора может не быть: плитка просит «последнюю», не зная,
                 // какая она. Кто именно — служба выясняет сама, чтобы вызывающему
                 // не приходилось лезть в хранилище и ждать его ради одного нажатия.
@@ -144,37 +136,23 @@ class RadioService : MediaSessionService() {
     }
 
     /**
-     * Ставит службу на передний план своим уведомлением-заглушкой.
+     * Ставит службу на передний план и обновляет её уведомление.
      *
-     * Заглушка живёт секунды: как только Media3 построит настоящее уведомление,
-     * оно заменит эту по тому же номеру. Пустой текст здесь недопустим — на
-     * экране уведомлений часов он выглядел бы сломанной строкой, поэтому пишем
-     * то же, что покажет экран: «Подключение…».
+     * Первый вызов приходит из `onStartCommand`, когда станция ещё неизвестна, —
+     * там это заглушка «Подключение…». Дальше метод зовётся на каждую перемену
+     * состояния, и `startForeground` с тем же номером просто заменяет содержимое:
+     * имя станции, название трека, кнопка «Стоп».
      */
-    private fun goForeground() {
-        val manager = getSystemService<NotificationManager>() ?: return
+    /** Заглушка на те секунды, пока станция ещё не известна. */
+    private fun showPlaceholder() = startForegroundWith(RadioNotifications.placeholder(this))
 
-        // Канал создаём сами: Media3 заводит свой лениво, а уведомление нужно
-        // прямо сейчас, иначе система его отбросит.
-        manager.createNotificationChannel(
-            NotificationChannel(
-                RadioNotificationProvider.CHANNEL_ID,
-                getString(R.string.app_name),
-                NotificationManager.IMPORTANCE_LOW,
-            ),
-        )
+    private fun showNotification(state: PlaybackState) =
+        startForegroundWith(RadioNotifications.build(this, state))
 
-        val notification = NotificationCompat.Builder(this, RadioNotificationProvider.CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.state_connecting))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true)
-            .build()
-
+    private fun startForegroundWith(notification: android.app.Notification) {
         ServiceCompat.startForeground(
             this,
-            RadioNotificationProvider.NOTIFICATION_ID,
+            RadioNotifications.ID,
             notification,
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
         )
@@ -301,6 +279,8 @@ class RadioService : MediaSessionService() {
         // в памяти до перезагрузки. Повтор поднимет её обратно.
         if (state is PlaybackState.Failed || state is PlaybackState.Idle) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        } else {
+            showNotification(state)
         }
         deps.playback.publish(state)
         RadioSurfaces.requestUpdate(this)
